@@ -31,7 +31,7 @@ server.tool(
       const parsedInput = parseAnalyzeImageInput(input);
       const config = loadConfig();
       const image = await loadImage(parsedInput);
-      const provider = getProvider(config.format);
+      const provider = await getProvider(config.format);
       const text = await withTimeout(parsedInput.timeout_seconds ?? DEFAULT_TIMEOUT_SECONDS, (signal) =>
         provider.analyze(config, {
           prompt: parsedInput.prompt ?? DEFAULT_PROMPT,
