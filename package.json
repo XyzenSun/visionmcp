@@ -1,0 +1,44 @@
+{
+  "name": "@xyzensun/visionmcp",
+  "version": "0.1.0",
+  "description": "MCP stdio server for image understanding through configurable multimodal providers (OpenAI / Anthropic / Gemini formats).",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "visionmcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "vision",
+    "image-understanding",
+    "multimodal",
+    "openai",
+    "anthropic",
+    "gemini"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
