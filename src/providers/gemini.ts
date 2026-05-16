@@ -1,6 +1,6 @@
 import { parseJsonResponse } from "../errors.js";
 import { joinBaseUrl } from "./base-url.js";
-import type { ProviderAdapter } from "./types.js";
+import { SYSTEM_PROMPT, type ProviderAdapter } from "./types.js";
 
 export const geminiProvider: ProviderAdapter = {
   async analyze(config, request) {
@@ -12,6 +12,9 @@ export const geminiProvider: ProviderAdapter = {
       },
       signal: request.signal,
       body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: SYSTEM_PROMPT }],
+        },
         contents: [
           {
             parts: [

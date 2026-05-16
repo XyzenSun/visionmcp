@@ -1,6 +1,6 @@
 import { parseJsonResponse } from "../errors.js";
 import { joinBaseUrl } from "./base-url.js";
-import type { ProviderAdapter } from "./types.js";
+import { SYSTEM_PROMPT, type ProviderAdapter } from "./types.js";
 
 export const openaiProvider: ProviderAdapter = {
   async analyze(config, request) {
@@ -15,6 +15,10 @@ export const openaiProvider: ProviderAdapter = {
         model: config.model,
         temperature: 0.7,
         messages: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT,
+          },
           {
             role: "user",
             content: [

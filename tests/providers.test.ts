@@ -5,6 +5,7 @@ import { parseJsonResponse } from "../src/errors.js";
 import { anthropicProvider, extractAnthropicText } from "../src/providers/anthropic.js";
 import { geminiProvider, extractGeminiText } from "../src/providers/gemini.js";
 import { openaiProvider, extractOpenAiText } from "../src/providers/openai.js";
+import { SYSTEM_PROMPT } from "../src/providers/types.js";
 import { DEFAULT_TIMEOUT_SECONDS, withTimeout } from "../src/timeout.js";
 
 const image = { base64: "iVBORw0KGgo=", mimeType: "image/png" };
@@ -38,7 +39,9 @@ describe("provider request construction", () => {
     const body = requestBody(fetchMock);
     expect(body.model).toBe("vision-model");
     expect(body.temperature).toBe(0.7);
-    expect(body.messages[0].content[1].image_url.url).toBe(`data:image/png;base64,${image.base64}`);
+    expect(body.messages[0]).toEqual({ role: "system", content: SYSTEM_PROMPT });
+    expect(body.messages[1].role).toBe("user");
+    expect(body.messages[1].content[1].image_url.url).toBe(`data:image/png;base64,${image.base64}`);
   });
 
   it("constructs Anthropic requests and extracts text", async () => {
@@ -58,6 +61,7 @@ describe("provider request construction", () => {
       }),
     );
     const body = requestBody(fetchMock);
+    expect(body.system).toBe(SYSTEM_PROMPT);
     expect(body.messages[0].content[0].source).toEqual({
       type: "base64",
       media_type: "image/png",
@@ -83,6 +87,7 @@ describe("provider request construction", () => {
       }),
     );
     const body = requestBody(fetchMock);
+    expect(body.systemInstruction).toEqual({ parts: [{ text: SYSTEM_PROMPT }] });
     expect(body.contents[0].parts[1].inline_data).toEqual({
       mime_type: "image/png",
       data: image.base64,
