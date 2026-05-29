@@ -1,5 +1,5 @@
 import { extname } from "node:path";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 
 import type { AnalyzeImageInput } from "./schema.js";
 
@@ -7,6 +7,8 @@ export type LoadedImage = {
   base64: string;
   mimeType: string;
 };
+
+export const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
 
 const MIME_BY_EXTENSION: Record<string, string> = {
   ".png": "image/png",
@@ -37,6 +39,12 @@ async function loadImagePath(imagePath: string, mimeType?: string): Promise<Load
   }
 
   try {
+    const { size } = await stat(imagePath);
+
+    if (size > MAX_IMAGE_BYTES) {
+      throw new Error("image file exceeds the 100MB limit");
+    }
+
     const file = await readFile(imagePath);
     return {
       base64: file.toString("base64"),

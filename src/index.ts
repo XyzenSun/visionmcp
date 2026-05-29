@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { createRequire } from "node:module";
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
@@ -9,9 +11,12 @@ import { getProvider } from "./providers/index.js";
 import { DEFAULT_PROMPT, analyzeImageInputShape, parseAnalyzeImageInput } from "./schema.js";
 import { DEFAULT_TIMEOUT_SECONDS, withTimeout } from "./timeout.js";
 
+const require = createRequire(import.meta.url);
+const packageMetadata = require("../package.json") as { name: string; version: string };
+
 const server = new McpServer({
-  name: "visionmcp",
-  version: "0.1.0",
+  name: packageMetadata.name,
+  version: packageMetadata.version,
 });
 
 server.tool(
@@ -30,7 +35,7 @@ server.tool(
     try {
       const parsedInput = parseAnalyzeImageInput(input);
       const config = loadConfig();
-      const image = await loadImage(parsedInput);
+      const image = await withTimeout(DEFAULT_TIMEOUT_SECONDS, () => loadImage(parsedInput));
       const provider = await getProvider(config.format);
       const text = await withTimeout(parsedInput.timeout_seconds ?? DEFAULT_TIMEOUT_SECONDS, (signal) =>
         provider.analyze(config, {

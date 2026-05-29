@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { inferMimeType, loadImage, parseBase64Image } from "../src/image.js";
+import { inferMimeType, loadImage, MAX_IMAGE_BYTES, parseBase64Image } from "../src/image.js";
 import { parseAnalyzeImageInput } from "../src/schema.js";
 
 const PNG_1X1 = "iVBORw0KGgo=";
@@ -20,6 +20,19 @@ describe("parseAnalyzeImageInput", () => {
 
   it("rejects remote URL image_path values", () => {
     expect(() => parseAnalyzeImageInput({ image_path: "https://example.com/a.png" })).toThrow(/local file path/);
+  });
+
+  it("rejects timeout_seconds below 1", () => {
+    expect(() => parseAnalyzeImageInput({ image_base64: PNG_1X1, timeout_seconds: 0 })).toThrow();
+  });
+
+  it("rejects timeout_seconds above 86400", () => {
+    expect(() => parseAnalyzeImageInput({ image_base64: PNG_1X1, timeout_seconds: 86401 })).toThrow();
+  });
+
+  it("accepts timeout_seconds at boundaries", () => {
+    expect(() => parseAnalyzeImageInput({ image_base64: PNG_1X1, timeout_seconds: 1 })).not.toThrow();
+    expect(() => parseAnalyzeImageInput({ image_base64: PNG_1X1, timeout_seconds: 86400 })).not.toThrow();
   });
 });
 
@@ -58,5 +71,13 @@ describe("image loading", () => {
       base64: PNG_1X1,
       mimeType: "image/png",
     });
+  });
+
+  it("rejects image files exceeding 100MB", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "vision-mcp-"));
+    const filePath = join(directory, "big.png");
+    await writeFile(filePath, Buffer.alloc(MAX_IMAGE_BYTES + 1));
+
+    await expect(loadImage({ image_path: filePath })).rejects.toThrow(/100MB limit/);
   });
 });
