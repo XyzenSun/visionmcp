@@ -1,6 +1,6 @@
 {
   "name": "@xyzensun/visionmcp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "MCP stdio server for image understanding through configurable multimodal providers (OpenAI / Anthropic / Gemini formats).",
   "type": "module",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "zod": "^3.25.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
+    "@types/node": "^22.19.19",
     "typescript": "^5.8.0",
     "vitest": "^3.1.0"
   },
