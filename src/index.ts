@@ -8,6 +8,7 @@ import { loadConfig } from "./config.js";
 import { asErrorMessage } from "./errors.js";
 import { loadImage } from "./image.js";
 import { getProvider } from "./providers/index.js";
+import { SYSTEM_PROMPT } from "./providers/types.js";
 import { DEFAULT_PROMPT, analyzeImageInputShape, parseAnalyzeImageInput } from "./schema.js";
 import { DEFAULT_TIMEOUT_SECONDS, withTimeout } from "./timeout.js";
 
@@ -27,6 +28,7 @@ server.tool(
 {
   "image_path": "/absolute/path/to/photo.png",
   "prompt": "What objects are visible in this image?",
+  "system_prompt": "You are a helpful image analysis assistant.",
   "timeout_seconds": 60
 }
 </example>`,
@@ -40,6 +42,7 @@ server.tool(
       const text = await withTimeout(parsedInput.timeout_seconds ?? DEFAULT_TIMEOUT_SECONDS, (signal) =>
         provider.analyze(config, {
           prompt: parsedInput.prompt ?? DEFAULT_PROMPT,
+          systemPrompt: parsedInput.system_prompt ?? SYSTEM_PROMPT,
           image,
           signal,
         }),

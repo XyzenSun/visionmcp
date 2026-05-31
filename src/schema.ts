@@ -7,6 +7,7 @@ export const analyzeImageInputShape = {
   image_base64: z.string().optional(),
   mime_type: z.string().optional(),
   prompt: z.string().optional(),
+  system_prompt: z.string().optional(),
   timeout_seconds: z.number().min(1).max(86400).optional(),
 };
 

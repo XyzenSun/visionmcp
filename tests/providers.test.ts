@@ -24,7 +24,7 @@ describe("provider request construction", () => {
   it("constructs OpenAI requests and extracts text", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ choices: [{ message: { content: "answer" } }] }));
 
-    await expect(openaiProvider.analyze(config, { prompt: "describe", image })).resolves.toBe("answer");
+    await expect(openaiProvider.analyze(config, { prompt: "describe", systemPrompt: SYSTEM_PROMPT, image })).resolves.toBe("answer");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.com/v1/chat/completions",
@@ -47,7 +47,7 @@ describe("provider request construction", () => {
   it("constructs Anthropic requests and extracts text", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ content: [{ type: "text", text: "answer" }] }));
 
-    await expect(anthropicProvider.analyze({ ...config, format: "anthropic" }, { prompt: "describe", image })).resolves.toBe("answer");
+    await expect(anthropicProvider.analyze({ ...config, format: "anthropic" }, { prompt: "describe", systemPrompt: SYSTEM_PROMPT, image })).resolves.toBe("answer");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.com/v1/messages",
@@ -74,7 +74,7 @@ describe("provider request construction", () => {
       jsonResponse({ candidates: [{ content: { parts: [{ text: "answer" }] } }] }),
     );
 
-    await expect(geminiProvider.analyze({ ...config, format: "gemini" }, { prompt: "describe", image })).resolves.toBe("answer");
+    await expect(geminiProvider.analyze({ ...config, format: "gemini" }, { prompt: "describe", systemPrompt: SYSTEM_PROMPT, image })).resolves.toBe("answer");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.com/v1beta/models/vision-model:generateContent",
@@ -93,6 +93,38 @@ describe("provider request construction", () => {
       data: image.base64,
     });
     expect(body.generationConfig.temperature).toBe(0.7);
+  });
+
+  it("uses custom system prompt for OpenAI", async () => {
+    const customPrompt = "You are a custom assistant.";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ choices: [{ message: { content: "answer" } }] }));
+
+    await openaiProvider.analyze(config, { prompt: "describe", systemPrompt: customPrompt, image });
+
+    const body = requestBody(fetchMock);
+    expect(body.messages[0]).toEqual({ role: "system", content: customPrompt });
+  });
+
+  it("uses custom system prompt for Anthropic", async () => {
+    const customPrompt = "You are a custom assistant.";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ content: [{ type: "text", text: "answer" }] }));
+
+    await anthropicProvider.analyze({ ...config, format: "anthropic" }, { prompt: "describe", systemPrompt: customPrompt, image });
+
+    const body = requestBody(fetchMock);
+    expect(body.system).toBe(customPrompt);
+  });
+
+  it("uses custom system prompt for Gemini", async () => {
+    const customPrompt = "You are a custom assistant.";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ candidates: [{ content: { parts: [{ text: "answer" }] } }] }),
+    );
+
+    await geminiProvider.analyze({ ...config, format: "gemini" }, { prompt: "describe", systemPrompt: customPrompt, image });
+
+    const body = requestBody(fetchMock);
+    expect(body.systemInstruction).toEqual({ parts: [{ text: customPrompt }] });
   });
 });
 
@@ -130,7 +162,7 @@ describe("timeout handling", () => {
       );
 
       const promise = withTimeout(1, (signal) =>
-        openaiProvider.analyze(config, { prompt: "describe", image, signal }),
+        openaiProvider.analyze(config, { prompt: "describe", systemPrompt: SYSTEM_PROMPT, image, signal }),
       );
       const assertion = expect(promise).rejects.toThrow(/timeout after 1 seconds/);
 

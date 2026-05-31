@@ -1,6 +1,6 @@
 import { parseJsonResponse } from "../errors.js";
 import { joinBaseUrl } from "./base-url.js";
-import { SYSTEM_PROMPT, type ProviderAdapter } from "./types.js";
+import type { ProviderAdapter } from "./types.js";
 
 export const anthropicProvider: ProviderAdapter = {
   async analyze(config, request) {
@@ -15,7 +15,7 @@ export const anthropicProvider: ProviderAdapter = {
       body: JSON.stringify({
         model: config.model,
         temperature: 0.7,
-        system: SYSTEM_PROMPT,
+        system: request.systemPrompt,
         messages: [
           {
             role: "user",

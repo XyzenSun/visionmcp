@@ -5,6 +5,7 @@ export const SYSTEM_PROMPT = `You are an image recognition expert. You need to r
 
 export type AnalyzeRequest = {
   prompt: string;
+  systemPrompt: string;
   image: LoadedImage;
   signal?: AbortSignal;
 };
