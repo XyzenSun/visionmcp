@@ -48,6 +48,7 @@ Parameters:
   image_base64?: string;     // raw base64 or data URL (data:image/png;base64,...)
   mime_type?: string;        // optional MIME override
   prompt?: string;           // optional; default: "请详细描述这张图片"
+  system_prompt?: string;    // optional; custom system prompt for the vision LLM (default: built-in image recognition expert prompt)
   timeout_seconds?: number;  // optional; default 120; aborts upstream on timeout
 }
 ```

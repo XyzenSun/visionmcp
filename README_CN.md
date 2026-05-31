@@ -48,6 +48,7 @@
   image_base64?: string;     // 原始 base64 或 data URL（data:image/png;base64,...）
   mime_type?: string;        // 可选，覆盖 MIME 类型
   prompt?: string;           // 可选，默认 "请详细描述这张图片"
+  system_prompt?: string;    // 可选，自定义视觉 LLM 的系统提示词（默认：内置图像识别专家提示词）
   timeout_seconds?: number;  // 可选，默认 120 秒，超时会中断上游请求
 }
 ```
